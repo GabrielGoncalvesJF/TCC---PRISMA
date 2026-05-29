@@ -1,0 +1,99 @@
+.container {
+    max-width: max-content;
+    width: 820px;
+    height: 720px;
+}
+
+#top-nav {
+    width: 100%;
+    height: 60px;
+    background-color: #409DA1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    box-sizing: border-box;
+}
+
+#top-nav .brand {
+    display: flex;
+    align-items: center;
+}
+
+#top-nav form {
+    flex: 1;
+    max-width: 400px;
+    margin: 0 20px;
+    display: flex;
+    justify-content: center;
+}
+
+#top-nav .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+}
+
+button[type="button"].btn {
+ border: none;
+ border-radius: 0;
+}
+
+button[type="button"].btn:hover {
+    background-color: #00000031;
+}
+
+button[type="button"].btn.btn-primary {
+    background-color: #84E488;
+    border: solid 1px #69c06c;
+    border-radius: 7px;
+}
+
+button[type="button"].btn.btn-primary:hover {
+    background-color: #6BCE90;
+    border-color: #53ab73;
+}
+
+button[type="button"].btn.btn-primary:active {
+    background-color: #56af77;
+    border-color: #419c62;
+}
+
+.main {
+    width: 80%;
+    height: 90%;
+}
+
+.card {
+    margin: 10% 0% 0% 10%;
+    width: 25%;
+    height: 5%;
+    box-shadow: #0000005e 1px -1px 10px;
+}
+
+.card#main {
+    margin: -25.7% 0% 0% 37.5%;
+    width: 40%;
+    height: 55%;
+}
+
+.card#side-right {
+    margin: -32.4% 0% 0% 80%;
+}
+
+.card-body {
+    height: 190px;
+}
+
+input[type="text"].form-control.me-2:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+button[type="button"].btn-close:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
