@@ -11,4 +11,5 @@ As páginas sem js terão sua base feita sem front-end pronto o outros.
 Forum parcialmente pronto, falta conteúdo para testar e finalizar (o front-end está quase pronto para ter noção sobre os código no front-end).
 Perfil já está sendo feito.
 
-07 de junho (Camila): Forum e Perfil parcialmentes completos, conteudo necessario para testes e finalização de front-end e back-end
+07 de junho (Camila): Forum e Perfil parcialmentes completos, conteudo necessario para testes e finalização de front-end e back-end.
+Talvez precise de uma função para identificar a aula (curso, vestibular ou ensino médio) e uma para reconhecer postagem recentes para por em destaque para conseguir testar o index.
