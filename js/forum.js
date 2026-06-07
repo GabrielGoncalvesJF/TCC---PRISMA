@@ -3,6 +3,21 @@
 // ------------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
+const forumTag = document.getElementById('forum-tag');
+const forumFiltro = document.getElementById('forum-filtro');
+const forumConteudo = document.getElementById('forum-conteudo');
+
+//    function criarPostElemento(criarPost) {
+//        const postDiv = document.createElement('div');
+//        postDiv.classList.add('completPost');
+//        produtoDiv.innerHTML = `
+//            <img class="foto-perfil" src="${}" alt="${}">
+//            <div>
+//            </div>
+//            <button></button>
+//        `;
+//        return postDiv;
+//    }
 
 async function listarPosts() {
     const res = await fetch('api/model/forum.php');
@@ -32,7 +47,6 @@ async function criarPost(titulo, corpo) {
 }
 // Exemplo de uso:
 // const data = await criarPost('Dúvida sobre a aula', 'Não entendi a parte 2...');
-
 
 async function deletarPost(id) {
     const res = await fetch('api/model/forum.php', {
