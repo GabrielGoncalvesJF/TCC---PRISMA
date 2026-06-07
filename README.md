@@ -7,7 +7,7 @@ O JS no seu PC vai funcionar normalmente, mas sem guardar informações de dados
 Projeto Prisma - 06 de junho (Camila): Separei o JS feitos no app.js e adicionei algumas coisas no cadastro e login.
 As páginas do cadastro e e login estão prontas, apenas certificar se o código está funcionando corretamente.
 A página principal está parcialmente completa, falta o conteúdo para finalizar o front-end e back-end.
-As páginas sem js terão sua base feita sem front-end pronto o outros.
+As páginas sem js terão sua base feita sem front-end pronto e outros.
 Forum parcialmente pronto, falta conteúdo para testar e finalizar (o front-end está quase pronto para ter noção sobre os código no front-end).
 Perfil já está sendo feito.
 
