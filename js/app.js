@@ -4,6 +4,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const itensVest = document.getElementById('destaque-vest');
     const itensCurso = document.getElementById('destaque-curso');
 
+//    function criarDestaqueElemento( ) {
+//        const postDiv = document.createElement('div');
+//        postDiv.classList.add(' ');
+//        produtoDiv.innerHTML = `
+//            <img class=" " src="${}" alt="${}">
+//            <div>
+//
+//            </div>
+//        `;
+//        return postDiv;
+//    }
+
     // Referências aos elementos do HTML
     const authBtn = document.getElementById("auth-button");
 
