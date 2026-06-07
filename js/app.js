@@ -1,277 +1,158 @@
-// ============================================================
-// app.js — Funções de comunicação com a API (PHP)
-// Uso: importe as funções que precisar em cada página HTML
-// ============================================================
 
-// ------------------------------------------------------------
-// AUTENTICAÇÃO
-// ------------------------------------------------------------
+document.addEventListener('DOMContentLoaded', async () => {
+    const itensDestaque = document.getElementById('destaque');
+    const itensVest = document.getElementById('destaque-vest');
+    const itensCurso = document.getElementById('destaque-curso');
 
-async function cadastrar(nome, email, senha, senhaConfirma, tipo = 'aluno') {
-    const res = await fetch('api/model/cadastro.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome, email, senha, senha_confirma: senhaConfirma, tipo })
-    });
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await cadastrar('João', 'joao@email.com', '123456', '123456', 'aluno');
-// if (data.sucesso) window.location.href = 'login.html';
-// else console.log(data.erros);
+    // Referências aos elementos do HTML
+    const authBtn = document.getElementById("auth-button");
 
+    // Simulador de verificação: checa se existe um token salvo (ex: localStorage)
+    const usuarioLogado = localStorage.getItem("usuarioToken");
 
-async function logar(email, senha) {
-    const res = await fetch('api/model/login.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, senha })
-    });
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await logar('joao@email.com', '123456');
-// if (data.sucesso) {
-//     window.location.href = data.usuario.tipo === 'professor' ? 'postagem_prof.html' : 'index.html';
-// }
+    const profileOffcanvasWrapper = document.getElementById('profile-offcanvas-wrapper');
+    const authButtonContainer = document.getElementById('auth-button-container');
 
+    if (usuarioLogado) {
+        if (authButtonContainer) authButtonContainer.style.display = 'none';
+        if (profileOffcanvasWrapper) profileOffcanvasWrapper.style.display = 'block';
+    } else {
+        if (authButtonContainer) authButtonContainer.style.display = 'block';
+        if (profileOffcanvasWrapper) profileOffcanvasWrapper.style.display = 'none';
+
+        if (authBtn) {
+            authBtn.textContent = "Login";
+            authBtn.href = "login.html";
+        }
+    }
+
+    // Log out do offcanvas
+    const logoutBtn = document.getElementById('logout-offcanvas');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await logout();
+            } catch (e) {
+                console.error(e);
+            } finally {
+                localStorage.removeItem('usuarioToken');
+                window.location.href = 'login.html';
+            }
+        });
+    }
+
+    // ==============================
+    // Conteúdo dinâmico de destaque
+    // ==============================
+
+    const LIMIT_PADRAO = 3;
+
+    function limpar(container) {
+        if (!container) return;
+        container.innerHTML = '';
+    }
+
+    function renderLista(container, conteudos) {
+        if (!container) return;
+        limpar(container);
+
+        if (!Array.isArray(conteudos) || conteudos.length === 0) {
+            container.innerHTML = '<p>Não possui conteúdo</p>';
+            return;
+        }
+
+        conteudos.forEach((c) => {
+            const card = document.createElement('div');
+            card.className = 'card mb-3';
+            card.style.background = '#0b2230';
+            card.style.borderColor = '#7A9EB3';
+
+            const titulo = c.titulo ? String(c.titulo) : '(sem título)';
+            const autor = c.autor_nome ? String(c.autor_nome) : '';
+            const tipo = c.tipo ? String(c.tipo) : '';
+
+            card.innerHTML = `
+                <div class="card-body" style="color:#dff3ff;">
+                    <div style="font-weight:700; margin-bottom:6px;">${titulo}</div>
+                    <div style="opacity:.9; font-size:.95rem;">
+                        ${autor ? `<span>por ${autor}</span>` : ''}
+                        ${autor && tipo ? ' • ' : ''}
+                        ${tipo ? `<span>${tipo}</span>` : ''}
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(card);
+        });
+    }
+
+    async function fetchConteudos({ tipo, limite }) {
+        const url = new URL('api/model/conteudos.php', window.location.origin);
+        url.searchParams.set('limit', String(limite ?? LIMIT_PADRAO));
+
+        // O backend atual não tem suporte a limit nem distingue 'vest/curso'.
+        // Ainda assim, mantemos 'tipo' como parâmetro opcional.
+        if (tipo && ['aula', 'postagem'].includes(tipo)) {
+            url.searchParams.set('tipo', tipo);
+        }
+
+        // Observação: o PHP bloqueia se não estiver logado.
+        // Vamos tentar mesmo assim; se der 401/erro, caímos no fallback.
+        const res = await fetch(url.toString(), { method: 'GET' });
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || !data.sucesso) {
+            const erro = data?.erro || `HTTP ${res.status}`;
+            throw new Error(erro);
+        }
+
+        return data.conteudos;
+    }
+
+    async function carregarDestaques() {
+        // Geral: mais recentes (sem filtrar por tipo)
+        try {
+            const conteudos = await fetchConteudos({ limite: LIMIT_PADRAO });
+            renderLista(itensDestaque, conteudos);
+        } catch (e) {
+            renderLista(itensDestaque, []);
+        }
+
+        // Vest / Curso: enquanto o PHP vai fazer o mapeamento final,
+        // aqui usamos uma heurística baseada em tipo.
+        // - ajuste opcional: se você escolher A ou B, basta trocar aqui.
+        const mapping = {
+            'destaque-vest': 'postagem',
+            'destaque-curso': 'aula'
+        };
+
+        try {
+            const conteudosVest = await fetchConteudos({
+                tipo: mapping['destaque-vest'],
+                limite: LIMIT_PADRAO
+            });
+            renderLista(itensVest, conteudosVest);
+        } catch (e) {
+            renderLista(itensVest, []);
+        }
+
+        try {
+            const conteudosCurso = await fetchConteudos({
+                tipo: mapping['destaque-curso'],
+                limite: LIMIT_PADRAO
+            });
+            renderLista(itensCurso, conteudosCurso);
+        } catch (e) {
+            renderLista(itensCurso, []);
+        }
+    }
+
+    await carregarDestaques();
+});
 
 async function logout() {
     const res = await fetch('api/model/logout.php', { method: 'POST' });
     return await res.json();
 }
-// Exemplo de uso:
-// const data = await logout();
-// if (data.sucesso) window.location.href = 'login.html';
 
 
-// ------------------------------------------------------------
-// PERFIL
-// ------------------------------------------------------------
-
-async function getPerfil() {
-    const res = await fetch('api/model/perfil.php');
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await getPerfil();
-// if (data.sucesso) console.log(data.usuario.nome);
-
-
-async function atualizarPerfil(formData) {
-    // formData: objeto FormData (necessário para envio de foto)
-    const res = await fetch('api/model/perfil.php', {
-        method: 'POST',
-        body: formData
-    });
-    return await res.json();
-}
-// Exemplo de uso:
-// const formData = new FormData();
-// formData.append('nome', 'João Silva');
-// formData.append('email', 'joao@email.com');
-// formData.append('foto_perfil', inputFoto.files[0]); // opcional
-// const data = await atualizarPerfil(formData);
-
-
-// ------------------------------------------------------------
-// CONTEÚDOS E AULAS
-// ------------------------------------------------------------
-
-async function listarConteudos(tipo = null) {
-    const url = tipo ? `api/model/cadastro.php?tipo=${tipo}` : 'api/model/conteudos.php';
-    const res = await fetch(url);
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await listarConteudos('aula');
-// data.conteudos.forEach(c => console.log(c.titulo));
-
-
-async function getConteudo(id) {
-    const res = await fetch(`api/model/conteudos.php?id=${id}`);
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await getConteudo(1);
-// console.log(data.conteudo.titulo);
-
-
-async function criarConteudo(titulo, corpo, tipo = 'aula') {
-    const res = await fetch('api/model/conteudos.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ titulo, corpo, tipo })
-    });
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await criarConteudo('Aula 1', 'Conteúdo da aula...', 'aula');
-
-
-async function editarConteudo(id, titulo, corpo) {
-    const res = await fetch('api/model/conteudos.php', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, titulo, corpo })
-    });
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await editarConteudo(1, 'Novo título', 'Novo conteúdo...');
-
-
-async function deletarConteudo(id) {
-    const res = await fetch('api/model/conteudos.php', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
-    });
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await deletarConteudo(1);
-
-
-// ------------------------------------------------------------
-// COMENTÁRIOS
-// ------------------------------------------------------------
-
-async function listarComentarios(conteudoId) {
-    const res = await fetch(`api/model/comentarios.php?conteudo_id=${conteudoId}`);
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await listarComentarios(1);
-// data.comentarios.forEach(c => console.log(c.corpo));
-
-
-async function criarComentario(conteudoId, corpo) {
-    const res = await fetch('api/model/comentarios.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conteudo_id: conteudoId, corpo })
-    });
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await criarComentario(1, 'Ótima aula!');
-
-
-async function deletarComentario(id) {
-    const res = await fetch('api/model/comentarios.php', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
-    });
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await deletarComentario(5);
-
-
-// ------------------------------------------------------------
-// MATERIAIS DO PROFESSOR
-// ------------------------------------------------------------
-
-async function listarMateriais(conteudoId) {
-    const res = await fetch(`api/model/materiais.php?conteudo_id=${conteudoId}`);
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await listarMateriais(1);
-// data.materiais.forEach(m => console.log(m.nome, m.url));
-
-
-async function adicionarMaterial(conteudoId, nome, url) {
-    const res = await fetch('api/model/materiais.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conteudo_id: conteudoId, nome, url })
-    });
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await adicionarMaterial(1, 'Slides da Aula', 'https://drive.google.com/...');
-
-
-async function removerMaterial(id) {
-    const res = await fetch('api/model/materiais.php', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
-    });
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await removerMaterial(3);
-
-
-// ------------------------------------------------------------
-// FÓRUM
-// ------------------------------------------------------------
-
-async function listarPosts() {
-    const res = await fetch('api/model/forum.php');
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await listarPosts();
-// data.posts.forEach(p => console.log(p.titulo, p.total_respostas));
-
-
-async function getPost(id) {
-    const res = await fetch(`api/model/forum.php?id=${id}`);
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await getPost(1);
-// console.log(data.post.titulo, data.post.respostas);
-
-
-async function criarPost(titulo, corpo) {
-    const res = await fetch('api/model/forum.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ titulo, corpo })
-    });
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await criarPost('Dúvida sobre a aula', 'Não entendi a parte 2...');
-
-
-async function deletarPost(id) {
-    const res = await fetch('api/model/forum.php', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
-    });
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await deletarPost(1);
-
-
-async function criarResposta(postId, corpo) {
-    const res = await fetch('api/model/forum.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ acao: 'resposta', post_id: postId, corpo })
-    });
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await criarResposta(1, 'Boa pergunta! A resposta é...');
-
-
-async function deletarResposta(id) {
-    const res = await fetch('api/model/forum.php', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ acao: 'resposta', id })
-    });
-    return await res.json();
-}
-// Exemplo de uso:
-// const data = await deletarResposta(2);
