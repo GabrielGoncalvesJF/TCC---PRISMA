@@ -2,7 +2,7 @@
 // FÓRUM
 // ------------------------------------------------------------
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
 const forumTag = document.getElementById('forum-tag');
 const forumFiltro = document.getElementById('forum-filtro');
 const forumConteudo = document.getElementById('forum-conteudo');
