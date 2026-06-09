@@ -13,3 +13,12 @@ Perfil já está sendo feito.
 
 07 de junho (Camila): Forum e Perfil parcialmentes completos, conteudo necessario para testes e finalização de front-end e back-end.
 Talvez precise de uma função para identificar a aula (curso, vestibular ou ensino médio) e uma para reconhecer postagem recentes para por em destaque para conseguir testar o index.
+
+
+09 de junho: Atualização de funcionalidades do professor e materiais.
+- perfil.html e js/perfil.js: carregamento do perfil com resumo automático, foto, nome, email e botão de editar funcionando.
+- postagem_prof.html e js/postagem_prof.js: fluxo de criação de conteúdo concluído e agora gera resumos após salvar.
+- material_prof.html e js/material_prof.js: listagem de conteúdos do professor com cards expandidos, exclusão de conteúdo com confirmação inline e controle de materiais.
+- api/model/materiais.php: suporte a upload de arquivos (multipart/form-data), gravação em api/img/materiais/, validação de tipos e tamanho, e manutenção do fluxo de materiais por URL.
+- css/style.css: estilos novos para visualização de imagem em overlay.
+- material_prof.html: painel de visualização de imagem adicionado, permitindo abrir preview customizado sem sair da página.

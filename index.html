@@ -39,15 +39,10 @@
             <a href="login.html" id="auth-button" class="btn-login">Login</a>
         </div>
 
-        <!-- Offcanvas (mostrado via js quando usuário estiver logado) -->
+        <!-- Offcanvas padrão compartilhado -->
         <div id="profile-offcanvas-wrapper" style="display: none;">
             <button class="btn btn-config" type="button" data-bs-toggle="offcanvas" data-bs-target="#demo">
-                <div class="row" style="display: grid;">
-                    <i class="material-icons" style="font-size: 47px; color: #dff3ff;">remove</i>
-                    <i class="material-icons" style="font-size: 47px; margin-top: -57.3%; color: #c7ebff;">remove</i>
-                    <i class="material-icons" style="font-size: 47px; margin-top: -57.5%; color: #afe2ff;">remove</i>
-                    <i class="material-icons" style="font-size: 47px; margin-top: -57.5%; color: #9ED3F0;">remove</i>
-                </div>
+                <img src="api/img/toggle-navegation.png" alt="" width="45px">
             </button>
 
             <div class="offcanvas offcanvas-end" id="demo">
@@ -60,25 +55,33 @@
                 </div>
                 <div class="offcanvas-body">
                     <div class="container-fluid">
-                        <div>
-                            <i class="material-icons" style="font-size: xx-large; float: left;">account_circle</i>
-                            <span style="font-size: larger;">my account</span>
-                        </div>
+                        <a href="perfil.html" style="text-decoration: none; color: inherit;">
+                            <div>
+                                <i class="material-icons" style="font-size: xx-large; float: left;">account_circle</i>
+                                <span style="font-size: larger;">minha conta</span>
+                            </div>
+                        </a>
                         <br>
-                        <div>
-                            <i class="material-icons" style="font-size: xx-large; float: left;">help_outline</i>
-                            <span style="font-size: larger;">help</span>
-                        </div>
+                        <a href="ajuda.html" style="text-decoration: none; color: inherit;">
+                            <div>
+                                <i class="material-icons" style="font-size: xx-large; float: left;">help_outline</i>
+                                <span style="font-size: larger;">ajuda</span>
+                            </div>
+                        </a>
                         <br>
-                        <div>
-                            <i class="material-icons" style="font-size: xx-large; float: left;">settings</i>
-                            <span style="font-size: larger;">settings</span>
-                        </div>
+                        <a href="configuracoes.html" style="text-decoration: none; color: inherit;">
+                            <div>
+                                <i class="material-icons" style="font-size: xx-large; float: left;">settings</i>
+                                <span style="font-size: larger;">configurações</span>
+                            </div>
+                        </a>
                         <br>
-                        <div>
-                            <i class="material-icons" style="font-size: xx-large; float: left;">info_outline</i>
-                            <span style="font-size: larger;">info</span>
-                        </div>
+                        <a href="info.html" style="text-decoration: none; color: inherit;">
+                            <div>
+                                <i class="material-icons" style="font-size: xx-large; float: left;">info_outline</i>
+                                <span style="font-size: larger;">info</span>
+                            </div>
+                        </a>
                         <br>
                         <div>
                             <i class="material-icons" style="font-size: xx-large; float: left;">exit_to_app</i>
@@ -142,6 +145,7 @@
     </div>
 
 
+    <script src="js/offcanvas.js"></script>
     <script src="js/app.js"></script>
 
 </body>

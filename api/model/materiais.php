@@ -51,19 +51,47 @@ if ($method === 'POST') {
     $conteudo_id = (int) ($dados['conteudo_id'] ?? 0);
     $nome        = trim($dados['nome'] ?? '');
     $url         = trim($dados['url']  ?? '');
+    $arquivo     = $_FILES['arquivo'] ?? null;
 
     $erros = [];
 
     if (!$conteudo_id) {
         $erros[] = 'conteudo_id é obrigatório.';
     }
-    if (empty($nome)) {
-        $erros[] = 'O nome do material é obrigatório.';
-    }
-    if (empty($url)) {
-        $erros[] = 'A URL do material é obrigatória.';
-    } elseif (!filter_var($url, FILTER_VALIDATE_URL)) {
-        $erros[] = 'URL inválida.';
+
+    $isUpload = $arquivo && $arquivo['error'] !== UPLOAD_ERR_NO_FILE;
+
+    if ($isUpload) {
+        if (empty($nome)) {
+            $nome = trim(pathinfo($arquivo['name'], PATHINFO_FILENAME));
+        }
+
+        if (empty($nome)) {
+            $erros[] = 'O nome do material é obrigatório.';
+        }
+
+        if ($arquivo['error'] !== UPLOAD_ERR_OK) {
+            $erros[] = 'Falha no envio do arquivo.';
+        }
+
+        $ext = strtolower(pathinfo($arquivo['name'], PATHINFO_EXTENSION));
+        $allowedExt = ['jpg','jpeg','png','gif','webp','pdf','doc','docx','ppt','pptx','txt','xls','xlsx'];
+        if (!in_array($ext, $allowedExt, true)) {
+            $erros[] = 'Tipo de arquivo não permitido.';
+        }
+
+        if ($arquivo['size'] > 15 * 1024 * 1024) {
+            $erros[] = 'O arquivo deve ter no máximo 15 MB.';
+        }
+    } else {
+        if (empty($nome)) {
+            $erros[] = 'O nome do material é obrigatório.';
+        }
+        if (empty($url)) {
+            $erros[] = 'A URL do material é obrigatória.';
+        } elseif (!filter_var($url, FILTER_VALIDATE_URL)) {
+            $erros[] = 'URL inválida.';
+        }
     }
 
     if (!empty($erros)) {
@@ -81,6 +109,23 @@ if ($method === 'POST') {
 
     if ($conteudo['autor_id'] !== $usuario_id) {
         responder(['sucesso' => false, 'erro' => 'Você não tem permissão para adicionar materiais neste conteúdo.'], 403);
+    }
+
+    if ($isUpload) {
+        $uploadDir = __DIR__ . '/../img/materiais';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $nomeArquivo = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', basename($arquivo['name']));
+        $arquivoNomeSeguro = time() . '_' . bin2hex(random_bytes(5)) . '.' . $ext;
+        $destino = $uploadDir . '/' . $arquivoNomeSeguro;
+
+        if (!move_uploaded_file($arquivo['tmp_name'], $destino)) {
+            responder(['sucesso' => false, 'erro' => 'Não foi possível salvar o arquivo enviado.'], 500);
+        }
+
+        $url = 'api/img/materiais/' . $arquivoNomeSeguro;
     }
 
     $stmt = $pdo->prepare(

@@ -40,7 +40,7 @@ if ($method === 'GET') {
     }
 
     $stmt = $pdo->prepare("
-        SELECT c.id, c.titulo, c.tipo, c.criado_em,
+        SELECT c.id, c.autor_id, c.titulo, c.tipo, c.corpo, c.criado_em,
                u.nome AS autor_nome, u.foto_perfil AS autor_foto
         FROM conteudos c
         JOIN usuarios u ON u.id = c.autor_id

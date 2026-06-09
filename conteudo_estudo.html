@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
-    
+<html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,47 +10,183 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <title>Prisma Ensino Personalizado</title>
+    <style>
+        #conteudo-corpo img { max-width: 100%; border-radius: 8px; }
+        .comentario-card { border-left: 3px solid #1FBDF4; }
+        .autor-foto { width: 36px; height: 36px; object-fit: cover; border-radius: 50%; }
+        .autor-foto-placeholder { width: 36px; height: 36px; border-radius: 50%; background: #1FBDF4;
+            display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: bold; }
+        #btn-deletar-conteudo { display: none; }
+    </style>
 </head>
 
 <body>
+
+    <!-- NAVBAR -->
     <div id="top-nav" class="container-fluid">
         <svg width="170" height="100" href=".html">
             <text fill="#ffffff" font-size="30" font-family="Verdana" x="40" y="60">Prisma</text>
             <text fill="#ffffff" font-size="6" font-family="Verdana" x="51.5" y="70">ENSINO PERSONALIZADO</text>
-
-            <polygon points="34.5,48 22.55,48 22.55,34"
-                style="fill:#000103;stroke:#000103;stroke-width:1;fill-rule:evenodd;" />
-            <polygon points="10,50.7 22.35,64 34.7,50.7"
-                style="fill:#1FBDF4;stroke:#1FBDF4;stroke-width:1;fill-rule:evenodd;" />
-            <polygon points="72,37 79,37 79,43 72,43"
-                style="fill: #409DA1;stroke: rgb(255, 255, 255);stroke-width: 0;fill-rule: evenodd;" />
-            <polygon points="69,36 73,38 75,42 77,38 81,36 77,34 75,30 73,34"
-                style="fill: rgb(255, 255, 255);stroke: rgb(255, 255, 255);stroke-width: 0;fill-rule: evenodd;" />
+            <polygon points="34.5,48 22.55,48 22.55,34" style="fill:#000103;stroke:#000103;stroke-width:1;fill-rule:evenodd;" />
+            <polygon points="10,50.7 22.35,64 34.7,50.7" style="fill:#1FBDF4;stroke:#1FBDF4;stroke-width:1;fill-rule:evenodd;" />
+            <polygon points="72,37 79,37 79,43 72,43" style="fill:#409DA1;stroke:rgb(255,255,255);stroke-width:0;fill-rule:evenodd;" />
+            <polygon points="69,36 73,38 75,42 77,38 81,36 77,34 75,30 73,34" style="fill:rgb(255,255,255);stroke:rgb(255,255,255);stroke-width:0;fill-rule:evenodd;" />
         </svg>
 
         <form class="d-flex" action="pesq_aluno.html" method="GET">
             <input class="form-control me-2" type="text" name="q" placeholder="Search" aria-label="Search">
-            <button class="btn btn-search" type="submit" aria-label="Search"> <i class="material-icons"
-                    style="font-size: xx-large; float: left;">search</i>
+            <button class="btn btn-search" type="submit" aria-label="Search">
+                <i class="material-icons" style="font-size:xx-large;float:left;">search</i>
             </button>
         </form>
 
         <a href="login.html" id="auth-button">Login</a>
 
-        <button class="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#demo">
+        <button class="btn btn-config" type="button" data-bs-toggle="offcanvas" data-bs-target="#demo">
             <img src="api/img/toggle-navegation.png" alt="" width="45px">
         </button>
 
         <div class="offcanvas offcanvas-end" id="demo">
             <div class="offcanvas-header">
+                <div>
+                    <i class="material-icons" style="font-size: xx-large; float: left;">settings</i>
+                    <span style="font-size: larger;">Perfil</span>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
             </div>
             <div class="offcanvas-body">
-                <div>
-
+                <div class="container-fluid">
+                    <a href="perfil.html" style="text-decoration: none; color: inherit;">
+                        <div>
+                            <i class="material-icons" style="font-size: xx-large; float: left;">account_circle</i>
+                            <span style="font-size: larger;">minha conta</span>
+                        </div>
+                    </a>
+                    <br>
+                    <a href="ajuda.html" style="text-decoration: none; color: inherit;">
+                        <div>
+                            <i class="material-icons" style="font-size: xx-large; float: left;">help_outline</i>
+                            <span style="font-size: larger;">ajuda</span>
+                        </div>
+                    </a>
+                    <br>
+                    <a href="configuracoes.html" style="text-decoration: none; color: inherit;">
+                        <div>
+                            <i class="material-icons" style="font-size: xx-large; float: left;">settings</i>
+                            <span style="font-size: larger;">configurações</span>
+                        </div>
+                    </a>
+                    <br>
+                    <a href="info.html" style="text-decoration: none; color: inherit;">
+                        <div>
+                            <i class="material-icons" style="font-size: xx-large; float: left;">info_outline</i>
+                            <span style="font-size: larger;">info</span>
+                        </div>
+                    </a>
+                    <br>
+                    <div>
+                        <i class="material-icons" style="font-size: xx-large; float: left;">exit_to_app</i>
+                        <span style="font-size: larger;">
+                            <button type="button" id="logout-offcanvas" class="btn btn-link p-0" style="color: inherit; text-decoration: none;">log out</button>
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="container my-4">
+
+        <!-- Loading -->
+        <div id="loading" class="text-center py-5">
+            <div class="spinner-border text-info" role="status"></div>
+            <p class="mt-2 text-muted">Carregando conteúdo...</p>
+        </div>
+
+        <!-- Erro -->
+        <div id="erro" class="alert alert-danger d-none">
+            Conteúdo não encontrado. <a href="index.html">Voltar ao início</a>
+        </div>
+
+        <!-- Conteúdo -->
+        <div id="pagina-conteudo" class="d-none">
+
+            <!-- Cabeçalho -->
+            <div class="mb-3">
+                <a href="index.html" class="text-decoration-none text-muted small">
+                    <i class="material-icons" style="font-size:16px;vertical-align:middle;">arrow_back</i> Voltar
+                </a>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <span id="conteudo-tipo" class="badge bg-info text-dark mb-2"></span>
+                    <h1 id="conteudo-titulo" class="h3 mb-3"></h1>
+
+                    <div class="d-flex align-items-center gap-2 mb-4">
+                        <div id="autor-foto-wrap"></div>
+                        <div>
+                            <div class="fw-semibold" id="conteudo-autor"></div>
+                            <div class="text-muted small" id="conteudo-data"></div>
+                        </div>
+                        <div class="ms-auto">
+                            <button id="btn-deletar-conteudo" class="btn btn-sm btn-outline-danger">
+                                <i class="material-icons" style="font-size:16px;vertical-align:middle;">delete</i> Deletar
+                            </button>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <div id="conteudo-corpo" class="mt-3"></div>
+                </div>
+            </div>
+
+            <!-- Materiais -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="mb-3">
+                        <i class="material-icons" style="vertical-align:middle;">attach_file</i> Materiais
+                    </h5>
+                    <div id="lista-materiais">
+                        <p class="text-muted small">Nenhum material disponível.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comentários -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="mb-3">
+                        <i class="material-icons" style="vertical-align:middle;">chat_bubble_outline</i>
+                        Comentários <span id="total-comentarios" class="badge bg-secondary ms-1">0</span>
+                    </h5>
+
+                    <!-- Form novo comentário (só aparece se logado) -->
+                    <div id="form-comentario" class="d-none mb-4">
+                        <textarea id="input-comentario" class="form-control mb-2" rows="3"
+                            placeholder="Escreva um comentário..."></textarea>
+                        <button id="btn-comentar" class="btn btn-sm btn-primary">Comentar</button>
+                        <span id="erro-comentario" class="text-danger small ms-2 d-none"></span>
+                    </div>
+
+                    <div id="aviso-login-comentario" class="alert alert-light small d-none">
+                        Faça login para comentar.
+                    </div>
+
+                    <!-- Lista de comentários -->
+                    <div id="lista-comentarios">
+                        <p class="text-muted small">Seja o primeiro a comentar!</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/conteudo_estudo.js"></script>
+</body>
+    <script src="js/offcanvas.js"></script>
+    <script src="js/conteudo_estudo.js"></script>
 </body>
 </html>

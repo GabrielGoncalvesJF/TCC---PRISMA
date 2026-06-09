@@ -8,64 +8,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const cadSenha = document.getElementById('senha');
     const cadSenhaConfirma = document.getElementById('senhaConfirma');
     const cadTipo = document.getElementById('tipo');
+    const btnCadastrar = document.querySelector('.btn.cadastrar');
 
-async function cadastrar(nome, email, senha, senhaConfirma, tipo = 'aluno') {
-    const res = await fetch('api/model/cadastro.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome, email, senha, senha_confirma: senhaConfirma, tipo })
-    });
-    return await res.json();
-}
-
-const btnCadastrar = document.querySelector('.btn.cadastrar');
-btnCadastrar?.addEventListener('click', async () => {
-    const nome = cadNome.value.trim();
-    const email = cadEmail.value.trim();
-    const senha = cadSenha.value;
-    const senhaConfirma = cadSenhaConfirma.value;
-    const tipo = cadTipo?.value || 'aluno';
-
-    const dados = await cadastrar(nome, email, senha, senhaConfirma, tipo);
-
-    if (!dados.sucesso) {
-        alert(dados.erros?.[0] || dados.erro || 'Erro no cadastro');
-        return;
+    async function cadastrar(nome, email, senha, senhaConfirma, tipo = 'aluno') {
+        const res = await fetch('api/model/cadastro.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome, email, senha, senha_confirma: senhaConfirma, tipo })
+        });
+        return await res.json();
     }
 
-    alert(dados.mensagem || 'Cadastro realizado!');
+    btnCadastrar?.addEventListener('click', async () => {
+        const nome = cadNome.value.trim();
+        const email = cadEmail.value.trim();
+        const senha = cadSenha.value;
+        const senhaConfirma = cadSenhaConfirma.value;
+        const tipo = cadTipo?.value || 'aluno';
 
-    // Se ao cadastrar a API já autenticar o usuário, então faz o login automático
-    // e redireciona para a tela correta (igual ao fluxo do login.js).
-    try {
-        const senhaLogin = senha;
+        if (!nome || !email || !senha || !senhaConfirma) {
+            alert('Preencha todos os campos para continuar.');
+            return;
+        }
 
-        // tenta extrair usuário retornado pelo cadastro
-        const usuario = dados.usuario || dados.user || dados.resultado?.usuario;
-        const emailLogin = usuario?.email || usuario?.email_usuario || email;
+        btnCadastrar.disabled = true;
+        const originalText = btnCadastrar.textContent;
+        btnCadastrar.textContent = 'Cadastrando...';
 
-        if (emailLogin && senhaLogin) {
-            const loginRes = await fetch('api/model/login.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: emailLogin, senha: senhaLogin })
-            }).then(r => r.json());
-
-            if (loginRes?.sucesso) {
-                const tipo = loginRes?.usuario?.tipo;
-                if (tipo === 'professor') window.location.href = 'material_prof.html';
-                else window.location.href = 'perfil.html';
+        try {
+            const dados = await cadastrar(nome, email, senha, senhaConfirma, tipo);
+            if (!dados.sucesso) {
+                alert(dados.erros?.[0] || dados.erro || 'Erro no cadastro');
                 return;
             }
+
+            alert(dados.mensagem || 'Cadastro realizado com sucesso! Agora faça login.');
+            window.location.href = 'login.html';
+        } catch (error) {
+            console.error(error);
+            alert('Não foi possível conectar ao servidor. Tente novamente mais tarde.');
+        } finally {
+            btnCadastrar.disabled = false;
+            btnCadastrar.textContent = originalText;
         }
-    } catch (e) {
-        // ignora e usa fallback
-    }
-
-    // fallback
-    window.location.href = 'index.html';
-});
-
+    });
 });
 
 
