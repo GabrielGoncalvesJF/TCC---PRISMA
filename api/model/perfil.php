@@ -84,16 +84,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($foto['size'] > $tamanho_max) {
             $erros[] = 'A foto deve ter no máximo 2MB.';
         } else {
-            $pasta = 'uploads/fotos/';
-            if (!is_dir($pasta)) {
-                mkdir($pasta, 0755, true);
+            $uploadDir = __DIR__ . '/../img/fotos/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
             }
             $extensao     = pathinfo($foto['name'], PATHINFO_EXTENSION);
             $nome_arquivo = 'usuario_' . $usuario_id . '_' . time() . '.' . $extensao;
-            $destino      = $pasta . $nome_arquivo;
+            $destino      = $uploadDir . $nome_arquivo;
 
             if (move_uploaded_file($foto['tmp_name'], $destino)) {
-                $foto_path = $destino;
+                $foto_path = 'api/img/fotos/' . $nome_arquivo;
             } else {
                 $erros[] = 'Erro ao salvar a foto. Tente novamente.';
             }

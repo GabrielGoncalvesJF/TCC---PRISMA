@@ -17,12 +17,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const perfilTipo = document.getElementById('perfil-tipo');
     const perfilEmail = document.getElementById('perfil-email');
     const perfilFotoWrap = document.getElementById('perfil-foto-wrap');
+    let previewUrl = '';
 
     function getUsuario() {
         try {
             return JSON.parse(localStorage.getItem('usuarioToken') || 'null');
         } catch {
             return null;
+        }
+    }
+
+    function renderFotoPerfil(usuario) {
+        if (!usuario) return;
+
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+            previewUrl = '';
+        }
+
+        if (usuario.foto_perfil) {
+            perfilFotoWrap.innerHTML = `<img src="${usuario.foto_perfil}" class="autor-foto" alt="Foto de perfil">`;
+        } else {
+            const inicial = usuario.nome?.charAt(0).toUpperCase() || '?';
+            perfilFotoWrap.innerHTML = `<div class="autor-foto-placeholder">${inicial}</div>`;
         }
     }
 
@@ -33,13 +50,24 @@ document.addEventListener('DOMContentLoaded', () => {
         perfilEmail.textContent = usuario.email || '';
         inputNome.value = usuario.nome || '';
         inputEmail.value = usuario.email || '';
+        renderFotoPerfil(usuario);
+    }
 
-        if (usuario.foto_perfil) {
-            perfilFotoWrap.innerHTML = `<img src="${usuario.foto_perfil}" class="autor-foto" alt="Foto de perfil">`;
-        } else {
-            const inicial = usuario.nome?.charAt(0).toUpperCase() || '?';
-            perfilFotoWrap.innerHTML = `<div class="autor-foto-placeholder">${inicial}</div>`;
-        }
+    function atualizarUsuarioLocal(usuario) {
+        if (!usuario) return;
+
+        const local = getUsuario() || {};
+        const novoUsuario = {
+            ...local,
+            ...usuario,
+            nome: usuario.nome ?? local.nome,
+            email: usuario.email ?? local.email,
+            tipo: usuario.tipo ?? local.tipo,
+            foto_perfil: usuario.foto_perfil ?? local.foto_perfil,
+            id: usuario.id ?? local.id
+        };
+
+        localStorage.setItem('usuarioToken', JSON.stringify(novoUsuario));
     }
 
     async function carregarPerfil() {
@@ -52,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            atualizarUsuarioLocal(data.usuario);
             renderUsuario(data.usuario);
         } catch (error) {
             console.error('Erro ao carregar perfil:', error);
@@ -98,7 +127,36 @@ document.addEventListener('DOMContentLoaded', () => {
         await carregarPerfil();
 
         btnAlterarPerfil?.addEventListener('click', alterarInformacoes);
-        btnCancelarEdicao?.addEventListener('click', () => alternarEdicao(false));
+        btnCancelarEdicao?.addEventListener('click', () => {
+            if (inputFoto) {
+                inputFoto.value = '';
+            }
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+                previewUrl = '';
+            }
+            renderUsuario(getUsuario());
+            alternarEdicao(false);
+        });
+
+        inputFoto?.addEventListener('change', () => {
+            const file = inputFoto.files?.[0];
+            if (!file) {
+                renderUsuario(getUsuario());
+                return;
+            }
+
+            if (!file.type.startsWith('image/')) {
+                return;
+            }
+
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+            }
+
+            previewUrl = URL.createObjectURL(file);
+            perfilFotoWrap.innerHTML = `<img src="${previewUrl}" class="autor-foto" alt="Pré-visualização da foto">`;
+        });
 
         formPerfil.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -130,6 +188,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 inputSenhaAtual.value = '';
                 inputSenhaNova.value = '';
                 inputSenhaConfirma.value = '';
+                if (inputFoto) {
+                    inputFoto.value = '';
+                }
+                if (previewUrl) {
+                    URL.revokeObjectURL(previewUrl);
+                    previewUrl = '';
+                }
                 await carregarPerfil();
                 alternarEdicao(false);
             } catch (error) {

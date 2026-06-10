@@ -102,6 +102,27 @@ function getParams() {
     return new URLSearchParams(window.location.search);
 }
 
+function getConteudoId() {
+    const params = getParams();
+    const idParam = params.get('id');
+    const id = idParam ? parseInt(idParam, 10) : NaN;
+
+    if (!Number.isNaN(id) && id > 0) {
+        return id;
+    }
+
+    if (params.has('list')) {
+        return null;
+    }
+
+    const fallback = parseInt(sessionStorage.getItem('conteudoEstudoId'), 10);
+    if (!Number.isNaN(fallback) && fallback > 0) {
+        return fallback;
+    }
+
+    return null;
+}
+
 function formatarData(str) {
     return new Date(str).toLocaleDateString('pt-BR', {
         day: '2-digit', month: 'long', year: 'numeric'
@@ -138,20 +159,72 @@ function renderizarConteudo(conteudo) {
     }
 }
 
+function renderizarListaConteudos(conteudos) {
+    const wrap = document.getElementById('conteudos-lista');
+    if (!conteudos.length) {
+        wrap.innerHTML = '<p class="text-muted small">Nenhum material enviado pelos professores foi encontrado.</p>';
+        return;
+    }
+
+    wrap.innerHTML = conteudos.map(conteudo => {
+        const titulo   = conteudo.titulo || '(sem título)';
+        const autor    = conteudo.autor_nome || 'Professor';
+        const data     = conteudo.criado_em ? formatarData(conteudo.criado_em) : '';
+        const tipo     = conteudo.tipo === 'aula' ? 'Aula' : 'Postagem';
+        const conteudoUrl = `conteudo_estudo.html?id=${conteudo.id}`;
+
+        return `
+            <div class="card shadow-sm mx-auto" style="max-width: 720px; width: 100%;">
+                <div class="card-body">
+                    <h5 class="mb-2"><a href="${conteudoUrl}" class="text-decoration-none">${titulo}</a></h5>
+                    <div class="text-muted small mb-2">${tipo} • ${autor} • ${data}</div>
+                    <p class="mb-0" style="text-align: justify;">${conteudo.corpo || ''}</p>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function carregarListaConteudos() {
+    const wrap = document.getElementById('conteudos-lista');
+    try {
+        const data = await listarConteudos();
+        if (!data.sucesso) {
+            wrap.innerHTML = '<p class="text-muted small">Erro ao carregar a lista de conteúdos.</p>';
+            return;
+        }
+        renderizarListaConteudos(data.conteudos || []);
+    } catch {
+        wrap.innerHTML = '<p class="text-muted small">Erro ao carregar a lista de conteúdos.</p>';
+    }
+}
+
 async function carregarMateriais(conteudoId) {
     const wrap = document.getElementById('lista-materiais');
     try {
         const res  = await fetch(`api/model/materiais.php?conteudo_id=${conteudoId}`);
         const data = await res.json();
-        if (!data.sucesso || !data.materiais?.length) return;
-        wrap.innerHTML = data.materiais.map(m => `
+        if (!data.sucesso) {
+            wrap.innerHTML = '<p class="text-muted small">Erro ao carregar materiais.</p>';
+            return;
+        }
+        if (!data.materiais?.length) {
+            wrap.innerHTML = '<p class="text-muted small">Nenhum material disponível.</p>';
+            return;
+        }
+
+        wrap.innerHTML = data.materiais.map(m => {
+            const label = m.nome || m.url || 'Material';
+            const href = m.url || '#';
+            return `
             <div class="d-flex align-items-center gap-2 mb-2">
                 <i class="material-icons text-info">description</i>
-                <a href="api/img/${m.arquivo}" target="_blank" class="text-decoration-none">
-                    ${m.titulo || m.arquivo}
+                <a href="${href}" target="_blank" rel="noreferrer" class="text-decoration-none">
+                    ${label}
                 </a>
             </div>
-        `).join('');
+        `;
+        }).join('');
     } catch {
         wrap.innerHTML = '<p class="text-muted small">Erro ao carregar materiais.</p>';
     }
@@ -206,11 +279,17 @@ function renderizarComentarios(comentarios, usuarioAtual) {
 }
 
 async function init() {
-    const id = parseInt(getParams().get('id'));
+    const id = getConteudoId();
 
-    if (!id) {
+    const params = getParams();
+    const mostrarLista = !id || params.has('list');
+
+    if (mostrarLista) {
         document.getElementById('loading').classList.add('d-none');
-        document.getElementById('erro').classList.remove('d-none');
+        document.getElementById('erro').classList.add('d-none');
+        document.getElementById('pagina-conteudo').classList.add('d-none');
+        document.getElementById('lista-conteudos').classList.remove('d-none');
+        await carregarListaConteudos();
         return;
     }
 

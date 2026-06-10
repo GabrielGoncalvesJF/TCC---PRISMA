@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         card.style.borderColor = '#7A9EB3';
         card.style.cursor = 'pointer';
         card.onclick = () => {
+            sessionStorage.setItem('conteudoEstudoId', conteudo.id);
             window.location.href = `conteudo_estudo.html?id=${conteudo.id}`;
         };
 

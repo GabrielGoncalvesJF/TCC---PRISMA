@@ -22,3 +22,9 @@ Talvez precise de uma função para identificar a aula (curso, vestibular ou ens
 - api/model/materiais.php: suporte a upload de arquivos (multipart/form-data), gravação em api/img/materiais/, validação de tipos e tamanho, e manutenção do fluxo de materiais por URL.
 - css/style.css: estilos novos para visualização de imagem em overlay.
 - material_prof.html: painel de visualização de imagem adicionado, permitindo abrir preview customizado sem sair da página.
+
+10 de junho: Correções de navegação e lista de conteúdos.
+- `index.html`: botão “Materiais enviados pelos Professores” adicionado abaixo dos cards, com altura reduzida e espaçamento adequado.
+- `conteudo_estudo.html` / `js/conteudo_estudo.js`: página agora exibe a lista de conteúdos quando acessada sem `?id=` ou com `?list=true`, evitando o erro "Conteúdo não encontrado".
+- `conteudo_estudo.html`: card principal de listagem ajustado para ocupar toda a largura disponível, enquanto cada material individual é exibido em uma caixa menor e alinhada corretamente.
+- Ajuste final do layout: o cartão de cabeçalho agora cobre toda a área de listagem e cada material individual aparece em uma caixa própria menor, evitando overflow.
